@@ -17,6 +17,14 @@ namespace Dapper.Extend
             {
                 this._dapperExtension = DapperExtension.UseMySql(connectionString);
             }
+            else if (dbEnum == DbEnum.SqlServer)
+            {
+                this._dapperExtension = DapperExtension.UseSqlServer(connectionString);
+            }
+            else
+            {
+                throw new Exception("未知的数据库类型");
+            }
         }
 
         protected TPrimary Insert(TEntity entity)
