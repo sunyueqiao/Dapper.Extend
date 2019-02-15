@@ -82,6 +82,22 @@ namespace Dapper.Extend.Data.Sql.Mapper
             return sqlObject;
         }
 
+        public static SqlObject BuildSelect(T t)
+        {
+            TableObject<T> tableObject = SqlObjectContext<T>.Build().CurrentRelationObject;
+            string condition = BuildSqlCondition(tableObject);
+            StringBuilder sql = new StringBuilder();
+            sql.Append($"select {tableObject.TableName}");
+            if (!string.IsNullOrEmpty(condition))
+            {
+                sql.Append(condition);
+            }
+            DynamicParameters parameters = PrepareParameters(t);
+            SqlObject sqlObject = new SqlObject { Sql = sql.ToString(), Parameters = parameters };
+            return sqlObject;
+
+        }
+
         private static string BuildSqlCondition(TableObject<T> tableObject)
         {
             StringBuilder condition = new StringBuilder();

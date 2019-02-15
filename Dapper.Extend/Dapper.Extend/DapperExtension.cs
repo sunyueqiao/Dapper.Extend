@@ -4,7 +4,7 @@ using System.Text;
 using System.Data;
 using Dapper;
 
-namespace Site.Builder.Infrastructure.Data.Sql
+namespace Dapper.Extend
 {
     public class DapperExtension
     {
@@ -28,9 +28,9 @@ namespace Site.Builder.Infrastructure.Data.Sql
             return dapperHelper;
         }
 
-        public int Insert(string sql, DynamicParameters parameters)
+        public T Insert<T>(string sql, DynamicParameters parameters) where T : struct
         {
-            return SqlMapper.Execute(this.DbConnection, sql, parameters);
+            return SqlMapper.ExecuteScalar<T>(this.DbConnection, sql, parameters);
         }
 
         public int Update(string sql, DynamicParameters parameters)

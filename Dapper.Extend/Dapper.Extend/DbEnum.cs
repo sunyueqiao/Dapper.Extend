@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Site.Builder.Infrastructure.Data.Sql
+namespace Dapper.Extend
 {
     public enum DbEnum
     {
