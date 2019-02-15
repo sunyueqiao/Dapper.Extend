@@ -2,38 +2,17 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using Dapper.Extend.Data.Sql.SqlObject;
 using System.Collections.Concurrent;
 using Dapper;
 using Dapper.Extend.Data.Sql.Attirbute;
 using Dapper.Extend.Data.Sql.Core;
+using Dapper.Extend.SqlObject.Mapper;
 
-namespace Dapper.Extend.Data.Sql.Mapper
+namespace Dapper.Extend.Mapper
 {
-    public static class SqlBuilder<T> where T : class
+    public class BaseSqlBuilder<T> where T : class
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="t"></param>
-        /// <returns></returns>
-        private static DynamicParameters PrepareParameters(T t)
-        {
-            Type type = typeof(T);
-            DynamicParameters parameters = new DynamicParameters();
-            PropertyInfo[] propertyInfos = type.GetProperties();
-            foreach (PropertyInfo property in propertyInfos)
-            {
-                if (!EntityAttributeUtil<T>.IsIdentity(property.Name))
-                {
-                    parameters.Add($"@{property.Name}", property.GetValue(t));
-                }
-            }
-
-            return parameters;
-        }
-
-        public static SqlObject BuildInsert(T t)
+        public virtual SqlObjectData BuildInsert(T t)
         {
             TableObject<T> tableObject = SqlObjectContext<T>.Build()
                 .CurrentRelationObject
@@ -42,19 +21,19 @@ namespace Dapper.Extend.Data.Sql.Mapper
             sql.Append($"insert into {tableObject.TableName}")
                 .Append($"({string.Join(",", tableObject.Columns)}) values")
                 .Append($"(@{string.Join(",@", tableObject.Columns)})");
-            DynamicParameters parameters = PrepareParameters(t);
-            SqlObject sqlObject = new SqlObject { Sql = sql.ToString(), Parameters = parameters };
+            DynamicParameters parameters = this.PrepareParameters(t);
+            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
 
             return sqlObject;
         }
 
-        public static SqlObject BuildUpdate(T t)
+        public virtual SqlObjectData BuildUpdate(T t)
         {
             TableObject<T> tableObject = SqlObjectContext<T>.Build()
                 .CurrentRelationObject
                 .FilterPrimaryKey()
                 .FilterIdentity();
-            DynamicParameters parameters = PrepareParameters(t);
+            DynamicParameters parameters = this.PrepareParameters(t);
             StringBuilder sql = new StringBuilder();
             sql.Append($"update {tableObject.TableName} set");
             int index = 0;
@@ -68,21 +47,21 @@ namespace Dapper.Extend.Data.Sql.Mapper
                 }
             });
             sql.Append(" where ").Append(BuildSqlCondition(tableObject));
-            SqlObject sqlObject = new SqlObject { Sql = sql.ToString(), Parameters = parameters };
+            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
             return sqlObject;
         }
 
-        public static SqlObject BuildDelete(T t)
+        public virtual SqlObjectData BuildDelete(T t)
         {
             TableObject<T> tableObject = SqlObjectContext<T>.Build().CurrentRelationObject;
             StringBuilder sql = new StringBuilder();
             sql.Append($"delete from {tableObject.TableName} where ").Append(BuildSqlCondition(tableObject));
-            DynamicParameters parameters = PrepareParameters(t);
-            SqlObject sqlObject = new SqlObject { Sql = sql.ToString(), Parameters = parameters };
+            DynamicParameters parameters = this.PrepareParameters(t);
+            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
             return sqlObject;
         }
 
-        public static SqlObject BuildSelect(T t)
+        public virtual SqlObjectData BuildSelect(T t)
         {
             TableObject<T> tableObject = SqlObjectContext<T>.Build().CurrentRelationObject;
             string condition = BuildSqlCondition(tableObject);
@@ -92,13 +71,13 @@ namespace Dapper.Extend.Data.Sql.Mapper
             {
                 sql.Append(condition);
             }
-            DynamicParameters parameters = PrepareParameters(t);
-            SqlObject sqlObject = new SqlObject { Sql = sql.ToString(), Parameters = parameters };
+            DynamicParameters parameters = this.PrepareParameters(t);
+            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
             return sqlObject;
 
         }
 
-        private static string BuildSqlCondition(TableObject<T> tableObject)
+        private string BuildSqlCondition(TableObject<T> tableObject)
         {
             StringBuilder condition = new StringBuilder();
             int index = 0;
@@ -112,6 +91,27 @@ namespace Dapper.Extend.Data.Sql.Mapper
                 }
             });
             return condition.ToString();
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        private DynamicParameters PrepareParameters(T t)
+        {
+            Type type = typeof(T);
+            DynamicParameters parameters = new DynamicParameters();
+            PropertyInfo[] propertyInfos = type.GetProperties();
+            foreach (PropertyInfo property in propertyInfos)
+            {
+                if (!EntityAttributeUtil<T>.IsIdentity(property.Name))
+                {
+                    parameters.Add($"@{property.Name}", property.GetValue(t));
+                }
+            }
+
+            return parameters;
         }
     }
 }

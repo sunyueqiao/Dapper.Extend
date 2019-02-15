@@ -1,5 +1,6 @@
 ﻿using Dapper.Extend;
-using Dapper.Extend.Data.Sql.Mapper;
+using Dapper.Extend.Mapper;
+using Dapper.Extend.SqlObject.Mapper;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,15 +12,18 @@ namespace Dapper.Extend
         where TEntity : class
     {
         private DapperExtension _dapperExtension;
+        private BaseSqlBuilder<TEntity> baseSqlBuilder;
         protected BaseDal(DbEnum dbEnum, string connectionString)
         {
             if (dbEnum == DbEnum.MySql)
             {
                 this._dapperExtension = DapperExtension.UseMySql(connectionString);
+                this.baseSqlBuilder = MysqlSqlBuilder<TEntity>.Build();
             }
             else if (dbEnum == DbEnum.SqlServer)
             {
                 this._dapperExtension = DapperExtension.UseSqlServer(connectionString);
+                this.baseSqlBuilder = SqlServerSqlBuilder<TEntity>.Build();
             }
             else
             {
@@ -29,19 +33,26 @@ namespace Dapper.Extend
 
         protected TPrimary Insert(TEntity entity)
         {
-            SqlObject sqlObject = SqlBuilder<TEntity>.BuildInsert(entity);
+            SqlObjectData sqlObject = this.baseSqlBuilder.BuildInsert(entity);
             return this._dapperExtension.Insert<TPrimary>(sqlObject.Sql, sqlObject.Parameters);
         }
 
         protected int Update(TEntity entity)
         {
-            SqlObject sqlObject = SqlBuilder<TEntity>.BuildUpdate(entity);
+            SqlObjectData sqlObject = this.baseSqlBuilder.BuildUpdate(entity);
             return this._dapperExtension.Update(sqlObject.Sql, sqlObject.Parameters);
         }
 
         protected IEnumerable<TEntity> Select(TEntity entity)
         {
+            SqlObjectData sqlObjectData = this.baseSqlBuilder.BuildSelect(entity);
             return this._dapperExtension.Select<TEntity>(string.Empty, null);
+        }
+
+        protected TEntity SelectEntity(TEntity entity)
+        {
+            SqlObjectData sqlObjectData = this.baseSqlBuilder.BuildSelect(entity);
+            return this._dapperExtension.SelectOne<TEntity>(sqlObjectData.Sql, sqlObjectData.Parameters);
         }
 
     }

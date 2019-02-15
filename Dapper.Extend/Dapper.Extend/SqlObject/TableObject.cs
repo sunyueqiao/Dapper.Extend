@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dapper.Extend.Data.Sql.SqlObject
+namespace Dapper.Extend.SqlObject.Mapper
 {
     public class TableObject<T> where T : class
     {

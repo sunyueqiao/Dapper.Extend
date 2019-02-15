@@ -1,11 +1,11 @@
-﻿using Dapper.Extend.Data.Sql.SqlObject;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 using System.Text;
 using Dapper.Extend.Data.Sql.Attirbute;
+using Dapper.Extend.SqlObject.Mapper;
 
 namespace Dapper.Extend.Data.Sql.Core
 {
