@@ -9,7 +9,15 @@ namespace Dapper.Extend.Mapper
     {
         public override SqlObjectData BuildInsert(T t)
         {
-            return base.BuildInsert(t);
+            SqlObjectData sqlObjectData = base.BuildInsert(t);
+            if (sqlObjectData.ExistIdentityColumn)
+            {
+                StringBuilder sql = new StringBuilder(sqlObjectData.Sql);
+                sql.Append(";SELECT @@IDENTITY;");
+                sqlObjectData.Sql = sql.ToString();
+            }
+
+            return sqlObjectData;
         }
 
         public static SqlServerSqlBuilder<T> Build()

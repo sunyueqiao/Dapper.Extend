@@ -9,7 +9,29 @@ namespace Dapper.Extend.Mapper
     {
         public override SqlObjectData BuildInsert(T t)
         {
-            return base.BuildInsert(t);
+            SqlObjectData sqlObjectData = base.BuildInsert(t);
+            if (sqlObjectData.ExistIdentityColumn)
+            {
+                StringBuilder sql = new StringBuilder(sqlObjectData.Sql);
+                sql.Append(";select @@IDENTITY;");
+            }
+
+            return sqlObjectData;
+        }
+
+        public override SqlObjectData BuildDelete(T t)
+        {
+            return base.BuildDelete(t);
+        }
+
+        public override SqlObjectData BuildSelect(T t)
+        {
+            return base.BuildSelect(t);
+        }
+
+        public override SqlObjectData BuildUpdate(T t)
+        {
+            return base.BuildUpdate(t);
         }
 
         public static MysqlSqlBuilder<T> Build()

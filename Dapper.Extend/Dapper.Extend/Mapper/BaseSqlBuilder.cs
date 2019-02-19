@@ -22,9 +22,7 @@ namespace Dapper.Extend.Mapper
                 .Append($"({string.Join(",", tableObject.Columns)}) values")
                 .Append($"(@{string.Join(",@", tableObject.Columns)})");
             DynamicParameters parameters = this.PrepareParameters(t);
-            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
-
-            return sqlObject;
+            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildUpdate(T t)
@@ -47,8 +45,7 @@ namespace Dapper.Extend.Mapper
                 }
             });
             sql.Append(" where ").Append(BuildSqlCondition(tableObject));
-            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
-            return sqlObject;
+            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildDelete(T t)
@@ -57,8 +54,7 @@ namespace Dapper.Extend.Mapper
             StringBuilder sql = new StringBuilder();
             sql.Append($"delete from {tableObject.TableName} where ").Append(BuildSqlCondition(tableObject));
             DynamicParameters parameters = this.PrepareParameters(t);
-            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
-            return sqlObject;
+            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildSelect(T t)
@@ -72,8 +68,7 @@ namespace Dapper.Extend.Mapper
                 sql.Append(condition);
             }
             DynamicParameters parameters = this.PrepareParameters(t);
-            SqlObjectData sqlObject = new SqlObjectData { Sql = sql.ToString(), Parameters = parameters };
-            return sqlObject;
+            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
 
         }
 
