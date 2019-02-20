@@ -7,10 +7,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace Dapper.Extend.Test
 {
     [TestClass]
-    public class UnitTest1
+    public class MySqlBuilderTest
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestInsertSql()
         {
             UserInfo userInfo = new UserInfo { UserId = 123, UserName = "张三" };
             SqlObjectData sqlObjectData = MysqlSqlBuilder<UserInfo>.Build().BuildInsert(userInfo);

@@ -14,8 +14,8 @@ namespace Dapper.Extend.SqlBuilder
             {
                 StringBuilder sql = new StringBuilder(sqlObjectData.Sql);
                 sql.Append(";select @@IDENTITY;");
+                sqlObjectData.Sql = sql.ToString();
             }
-
             return sqlObjectData;
         }
 
