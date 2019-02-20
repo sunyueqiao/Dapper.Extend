@@ -1,6 +1,6 @@
 ﻿using Dapper.Extend;
 using Dapper.Extend.Mapper;
-using Dapper.Extend.SqlObject.Mapper;
+using Dapper.Extend.SqlBuilder;
 using System;
 using System.Collections.Generic;
 using System.Text;

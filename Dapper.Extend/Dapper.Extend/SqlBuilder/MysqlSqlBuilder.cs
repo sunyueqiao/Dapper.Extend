@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Dapper.Extend.Mapper;
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Dapper.Extend.SqlObject.Mapper;
 
-namespace Dapper.Extend.Mapper
+namespace Dapper.Extend.SqlBuilder
 {
     public class MysqlSqlBuilder<T> : BaseSqlBuilder<T> where T : class
     {

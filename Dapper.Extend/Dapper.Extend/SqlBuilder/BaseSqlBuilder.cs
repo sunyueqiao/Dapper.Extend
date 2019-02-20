@@ -6,81 +6,82 @@ using System.Collections.Concurrent;
 using Dapper;
 using Dapper.Extend.Data.Sql.Attirbute;
 using Dapper.Extend.Data.Sql.Core;
-using Dapper.Extend.SqlObject.Mapper;
+using Dapper.Extend.Mapper;
 
-namespace Dapper.Extend.Mapper
+namespace Dapper.Extend.SqlBuilder
 {
-    public class BaseSqlBuilder<T> where T : class
+    public abstract class BaseSqlBuilder<T> where T : class
     {
         public virtual SqlObjectData BuildInsert(T t)
         {
-            TableObject<T> tableObject = SqlObjectContext<T>.Build()
+            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build()
                 .CurrentRelationObject
                 .FilterIdentity();
             StringBuilder sql = new StringBuilder();
-            sql.Append($"insert into {tableObject.TableName}")
-                .Append($"({string.Join(",", tableObject.Columns)}) values")
-                .Append($"(@{string.Join(",@", tableObject.Columns)})");
+            sql.Append($"insert into {entityMapper.TableName}")
+                .Append($"({string.Join(",", entityMapper.ColumnNames)}) values")
+                .Append($"(@{string.Join(",@", entityMapper.PropertyNames)})");
             DynamicParameters parameters = this.PrepareParameters(t);
-            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
+            return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildUpdate(T t)
         {
-            TableObject<T> tableObject = SqlObjectContext<T>.Build()
+            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build()
                 .CurrentRelationObject
                 .FilterPrimaryKey()
                 .FilterIdentity();
             DynamicParameters parameters = this.PrepareParameters(t);
             StringBuilder sql = new StringBuilder();
-            sql.Append($"update {tableObject.TableName} set");
+            sql.Append($"update {entityMapper.TableName} set");
             int index = 0;
-            tableObject.Columns.ForEach(column =>
+
+            entityMapper.ColumnNames.ForEach(column =>
             {
                 sql.Append($"{column}=@{column}");
-                index = tableObject.Columns.IndexOf(column);
-                if (index < tableObject.Columns.Count - 1)
+                index = entityMapper.ColumnNames.IndexOf(column);
+                if (index < entityMapper.RelationColumns.Count - 1)
                 {
                     sql.Append(",");
                 }
             });
-            sql.Append(" where ").Append(BuildSqlCondition(tableObject));
-            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
+            sql.Append(" where ").Append(BuildSqlCondition(entityMapper));
+            return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildDelete(T t)
         {
-            TableObject<T> tableObject = SqlObjectContext<T>.Build().CurrentRelationObject;
+            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build().CurrentRelationObject;
             StringBuilder sql = new StringBuilder();
-            sql.Append($"delete from {tableObject.TableName} where ").Append(BuildSqlCondition(tableObject));
+            sql.Append($"delete from {entityMapper.TableName} where ").Append(BuildSqlCondition(entityMapper));
             DynamicParameters parameters = this.PrepareParameters(t);
-            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
+            return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildSelect(T t)
         {
-            TableObject<T> tableObject = SqlObjectContext<T>.Build().CurrentRelationObject;
-            string condition = BuildSqlCondition(tableObject);
+            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build().CurrentRelationObject;
+            string condition = BuildSqlCondition(entityMapper);
             StringBuilder sql = new StringBuilder();
-            sql.Append($"select {tableObject.TableName}");
+            sql.Append($"select {string.Join(",", entityMapper.ColumnNames)} from {entityMapper.TableName}");
             if (!string.IsNullOrEmpty(condition))
             {
                 sql.Append(condition);
             }
             DynamicParameters parameters = this.PrepareParameters(t);
-            return SqlObjectData.Init(string.IsNullOrEmpty(tableObject.IdentityColumn), sql.ToString(), parameters);
+            return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
 
         }
 
-        private string BuildSqlCondition(TableObject<T> tableObject)
+        private string BuildSqlCondition(EntityMapper<T> tableObject)
         {
             StringBuilder condition = new StringBuilder();
             int index = 0;
-            tableObject.PrimaryColumns.ForEach(column =>
+            tableObject.RelationPrimarys.ForEach(column =>
             {
-                condition.Append($"{column}=@{column}");
-                index = tableObject.PrimaryColumns.IndexOf(column);
-                if (index < tableObject.PrimaryColumns.Count - 1)
+                condition.Append($"{column.ColumnName}=@{column.PropertyName}");
+                index = tableObject.RelationPrimarys.IndexOf(column);
+                if (index < tableObject.RelationPrimarys.Count - 1)
                 {
                     condition.Append(" and ");
                 }
