@@ -74,12 +74,43 @@ namespace Dapper.Extend.Mapper
             }
         }
 
+        public Dictionary<string, string> InsertColumns
+        {
+            get
+            {
+                Dictionary<string, string> dictionary = new Dictionary<string, string>();
+                foreach (var item in this.RelationColumns)
+                {
+                    if (item.PropertyValue != null && !EntityAttributeUtil<T>.IsIdentity(item.PropertyName))
+                    {
+                        dictionary.Add(item.ColumnName, item.PropertyName);
+                    }
+                }
+                return dictionary;
+            }
+        }
+
+        public Dictionary<string, string> UpdateColumns
+        {
+            get
+            {
+                Dictionary<string, string> dictionary = new Dictionary<string, string>();
+                foreach (var item in this.RelationColumns)
+                {
+                    if (item.PropertyValue != null && !EntityAttributeUtil<T>.IsIdentity(item.PropertyName) & !EntityAttributeUtil<T>.IsPrimaryKey(item.PropertyName))
+                    {
+                        dictionary.Add(item.ColumnName, item.PropertyName);
+                    }
+                }
+                return dictionary;
+            }
+        }
 
         /// <summary>
         /// 过滤掉自增列
         /// </summary>
         /// <returns></returns>
-        public EntityMapper<T> FilterIdentity()
+        public EntityMapper<T> ExcludeIdentity()
         {
             this.RelationColumns.RemoveAll((item) =>
             {
@@ -93,7 +124,7 @@ namespace Dapper.Extend.Mapper
         /// 过滤掉主键
         /// </summary>
         /// <returns></returns>
-        public EntityMapper<T> FilterPrimaryKey()
+        public EntityMapper<T> ExcludePrimary()
         {
             this.RelationColumns.RemoveAll((item) =>
             {

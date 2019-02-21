@@ -15,6 +15,14 @@ namespace Dapper.Extend.Mapper
         }
 
         /// <summary>
+        /// 属性值
+        /// </summary>
+        public object PropertyValue
+        {
+            get;set;
+        }
+
+        /// <summary>
         /// 列名
         /// </summary>
         public string ColumnName

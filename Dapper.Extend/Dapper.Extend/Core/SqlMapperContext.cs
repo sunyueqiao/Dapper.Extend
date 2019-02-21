@@ -10,36 +10,28 @@ using Dapper.Extend.Mapper;
 
 namespace Dapper.Extend.Data.Sql.Core
 {
-    public class SqlObjectContext<T> where T : class
+    public class SqlMapperContext<T> where T : class
     {
-        /// <summary>
-        /// 同步字典存储关系映射对象
-        /// </summary>
-        private static ConcurrentDictionary<string, EntityMapper<T>> _tableDictionary = new ConcurrentDictionary<string, EntityMapper<T>>();
-
-        public static SqlObjectContext<T> Build()
+        public static SqlMapperContext<T> Build()
         {
-            return SqlObjectContextBuild.Instance;
+            return SqlObjectContextBuilder.Instance;
         }
 
-        public EntityMapper<T> CurrentRelationObject
+        public EntityMapper<T> GetEntityMapper(T t)
         {
-            get
-            {
-                return this.RefreshMappingEntity();
-            }
+            return this.RefreshMapperData(t);
         }
 
         /// <summary>
         /// 构造表集合对象 包含表名 列集合
         /// </summary>
         /// <returns></returns>
-        private EntityMapper<T> RefreshMappingEntity()
+        private EntityMapper<T> RefreshMapperData(T t)
         {
             Type type = typeof(T);
             string classFullName = type.FullName;
             string className = type.Name;
-            EntityMapper<T> tableObject = new EntityMapper<T>
+            EntityMapper<T> entityMapper = new EntityMapper<T>
             {
                 ClassFullName = classFullName,
                 ClassName = className,
@@ -47,37 +39,23 @@ namespace Dapper.Extend.Data.Sql.Core
                 RelationColumns = new List<RelationMapper>(),
                 RelationPrimarys = new List<RelationMapper>()
             };
-            if (_tableDictionary.ContainsKey(classFullName) && _tableDictionary.TryGetValue(classFullName, out tableObject))
-            {
-                return tableObject;
-            }
-
-            foreach (PropertyInfo property in Properties)
+            foreach (PropertyInfo property in t.GetType().GetProperties())
             {
                 string columnName = this.GetColumnName(property);
                 string propertyName = property.Name;
+                object propertyValue = property.GetValue(t);
                 if (EntityAttributeUtil<T>.IsIdentity(propertyName))
                 {
-                    tableObject.RelationIdentity = new RelationMapper { PropertyName = property.Name, ColumnName = columnName };
+                    entityMapper.RelationIdentity = new RelationMapper { PropertyName = property.Name, ColumnName = columnName, PropertyValue = propertyValue };
                 }
                 if (EntityAttributeUtil<T>.IsPrimaryKey(propertyName))
                 {
-                    tableObject.RelationPrimarys.Add(new RelationMapper { ColumnName = columnName, PropertyName = propertyName });
+                    entityMapper.RelationPrimarys.Add(new RelationMapper { ColumnName = columnName, PropertyName = propertyName, PropertyValue = propertyValue });
                 }
-                tableObject.RelationColumns.Add(new RelationMapper { ColumnName = columnName, PropertyName = propertyName });
+                entityMapper.RelationColumns.Add(new RelationMapper { ColumnName = columnName, PropertyName = propertyName, PropertyValue = propertyValue });
             }
 
-            _tableDictionary.TryAdd(classFullName, tableObject);
-            return tableObject;
-        }
-
-        static PropertyInfo[] Properties
-        {
-            get
-            {
-                Type type = typeof(T);
-                return type.GetProperties();
-            }
+            return entityMapper;
         }
 
         private string GetTableName(Type type)
@@ -107,9 +85,9 @@ namespace Dapper.Extend.Data.Sql.Core
             return columnName;
         }
 
-        private class SqlObjectContextBuild
+        private class SqlObjectContextBuilder
         {
-            public static SqlObjectContext<T> Instance { get; } = new SqlObjectContext<T>();
+            public static SqlMapperContext<T> Instance { get; } = new SqlMapperContext<T>();
         }
     }
 }

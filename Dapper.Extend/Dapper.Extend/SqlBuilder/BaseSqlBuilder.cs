@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
+using System.Linq;
 using System.Collections.Concurrent;
 using Dapper;
 using Dapper.Extend.Data.Sql.Attirbute;
@@ -14,53 +15,51 @@ namespace Dapper.Extend.SqlBuilder
     {
         public virtual SqlObjectData BuildInsert(T t)
         {
-            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build()
-                .CurrentRelationObject
-                .FilterIdentity();
+            EntityMapper<T> entityMapper = SqlMapperContext<T>.Build()
+                .GetEntityMapper(t)
+                .ExcludeIdentity();
             StringBuilder sql = new StringBuilder();
             sql.Append($"insert into {entityMapper.TableName}")
-                .Append($"({string.Join(",", entityMapper.ColumnNames)}) values")
-                .Append($"(@{string.Join(",@", entityMapper.PropertyNames)})");
-            DynamicParameters parameters = this.PrepareParameters(t);
+                .Append($"({string.Join(",", entityMapper.InsertColumns.Keys)}) values ")
+                .Append($"(@{string.Join(",@", entityMapper.InsertColumns.Values)})");
+            DynamicParameters parameters = this.PrepareParameters(entityMapper);
             return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildUpdate(T t)
         {
-            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build()
-                .CurrentRelationObject
-                .FilterPrimaryKey()
-                .FilterIdentity();
-            DynamicParameters parameters = this.PrepareParameters(t);
+            EntityMapper<T> entityMapper = SqlMapperContext<T>.Build()
+                .GetEntityMapper(t);
+            DynamicParameters parameters = this.PrepareParameters(entityMapper);
             StringBuilder sql = new StringBuilder();
-            sql.Append($"update {entityMapper.TableName} set");
+            sql.Append($"update {entityMapper.TableName} set ");
             int index = 0;
-
-            entityMapper.ColumnNames.ForEach(column =>
+            foreach (var item in entityMapper.UpdateColumns)
             {
-                sql.Append($"{column}=@{column}");
-                index = entityMapper.ColumnNames.IndexOf(column);
-                if (index < entityMapper.RelationColumns.Count - 1)
+                sql.Append($"{item.Key}=@{item.Value}");
+                if (index < entityMapper.InsertColumns.Count - 1)
                 {
                     sql.Append(",");
                 }
-            });
+
+                index++;
+            }
             sql.Append(" where ").Append(BuildSqlCondition(entityMapper));
             return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildDelete(T t)
         {
-            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build().CurrentRelationObject;
+            EntityMapper<T> entityMapper = SqlMapperContext<T>.Build().GetEntityMapper(t);
             StringBuilder sql = new StringBuilder();
             sql.Append($"delete from {entityMapper.TableName} where ").Append(BuildSqlCondition(entityMapper));
-            DynamicParameters parameters = this.PrepareParameters(t);
+            DynamicParameters parameters = this.PrepareParameters(entityMapper);
             return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
         }
 
         public virtual SqlObjectData BuildSelect(T t)
         {
-            EntityMapper<T> entityMapper = SqlObjectContext<T>.Build().CurrentRelationObject;
+            EntityMapper<T> entityMapper = SqlMapperContext<T>.Build().GetEntityMapper(t);
             string condition = BuildSqlCondition(entityMapper);
             StringBuilder sql = new StringBuilder();
             sql.Append($"select {string.Join(",", entityMapper.ColumnNames)} from {entityMapper.TableName}");
@@ -68,24 +67,26 @@ namespace Dapper.Extend.SqlBuilder
             {
                 sql.Append(condition);
             }
-            DynamicParameters parameters = this.PrepareParameters(t);
+
+            DynamicParameters parameters = this.PrepareParameters(entityMapper);
             return SqlObjectData.Init(entityMapper.RelationIdentity != null, sql.ToString(), parameters);
 
         }
 
-        private string BuildSqlCondition(EntityMapper<T> tableObject)
+        private string BuildSqlCondition(EntityMapper<T> entityMapper)
         {
             StringBuilder condition = new StringBuilder();
             int index = 0;
-            tableObject.RelationPrimarys.ForEach(column =>
+            entityMapper.RelationPrimarys.ForEach(column =>
             {
                 condition.Append($"{column.ColumnName}=@{column.PropertyName}");
-                index = tableObject.RelationPrimarys.IndexOf(column);
-                if (index < tableObject.RelationPrimarys.Count - 1)
+                index = entityMapper.RelationPrimarys.IndexOf(column);
+                if (index < entityMapper.RelationPrimarys.Count - 1)
                 {
                     condition.Append(" and ");
                 }
             });
+
             return condition.ToString();
         }
 
@@ -93,18 +94,14 @@ namespace Dapper.Extend.SqlBuilder
         /// 
         /// </summary>
         /// <param name="t"></param>
+        /// <param name="mapper"></param>
         /// <returns></returns>
-        private DynamicParameters PrepareParameters(T t)
+        private DynamicParameters PrepareParameters(EntityMapper<T> mapper)
         {
-            Type type = typeof(T);
             DynamicParameters parameters = new DynamicParameters();
-            PropertyInfo[] propertyInfos = type.GetProperties();
-            foreach (PropertyInfo property in propertyInfos)
+            foreach (var item in mapper.RelationColumns)
             {
-                if (!EntityAttributeUtil<T>.IsIdentity(property.Name))
-                {
-                    parameters.Add($"@{property.Name}", property.GetValue(t));
-                }
+                parameters.Add($"@{item.PropertyName}", item.PropertyValue);
             }
 
             return parameters;

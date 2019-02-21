@@ -44,6 +44,12 @@ namespace Dapper.Extend
             return this._dapperExtension.Update(sqlObject.Sql, sqlObject.Parameters);
         }
 
+        public int Delete(TEntity entity)
+        {
+            SqlObjectData sqlObject = this._baseSqlBuilder.BuildDelete(entity);
+            return this._dapperExtension.Delete(sqlObject.Sql, sqlObject.Parameters);
+        }
+
         public IEnumerable<TEntity> Select(TEntity entity)
         {
             SqlObjectData sqlObjectData = this._baseSqlBuilder.BuildSelect(entity);
