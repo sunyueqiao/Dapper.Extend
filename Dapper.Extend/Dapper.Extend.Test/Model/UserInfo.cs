@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 
 namespace Dapper.Extend.Test.Model
 {
-    [TableName("userinfo")]
+    [TableName("user_info")]
     public class UserInfo
     {
         [PrimaryKey]
-        [Identity]
         [ColumnName("user_id")]
         public long UserId { get; set; }
 

@@ -31,25 +31,25 @@ namespace Dapper.Extend
             }
         }
 
-        protected TPrimary Insert(TEntity entity)
+        public TPrimary Insert(TEntity entity)
         {
             SqlObjectData sqlObject = this.baseSqlBuilder.BuildInsert(entity);
             return this._dapperExtension.Insert<TPrimary>(sqlObject.Sql, sqlObject.Parameters);
         }
 
-        protected int Update(TEntity entity)
+        public int Update(TEntity entity)
         {
             SqlObjectData sqlObject = this.baseSqlBuilder.BuildUpdate(entity);
             return this._dapperExtension.Update(sqlObject.Sql, sqlObject.Parameters);
         }
 
-        protected IEnumerable<TEntity> Select(TEntity entity)
+        public IEnumerable<TEntity> Select(TEntity entity)
         {
             SqlObjectData sqlObjectData = this.baseSqlBuilder.BuildSelect(entity);
             return this._dapperExtension.Select<TEntity>(string.Empty, null);
         }
 
-        protected TEntity SelectEntity(TEntity entity)
+        public TEntity SelectEntity(TEntity entity)
         {
             SqlObjectData sqlObjectData = this.baseSqlBuilder.BuildSelect(entity);
             return this._dapperExtension.SelectOne<TEntity>(sqlObjectData.Sql, sqlObjectData.Parameters);
