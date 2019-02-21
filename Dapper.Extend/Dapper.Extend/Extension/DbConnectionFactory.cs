@@ -5,7 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using MySql.Data.MySqlClient;
 
-namespace Dapper.Extend
+namespace Dapper.Extend.Extension
 {
     public static class DbConnectionFactory
     {

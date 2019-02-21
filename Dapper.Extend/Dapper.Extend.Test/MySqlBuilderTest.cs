@@ -13,7 +13,7 @@ namespace Dapper.Extend.Test
         [TestMethod]
         public void TestInsertSql()
         {
-            UserInfo userInfo = new UserInfo { UserId = 3, UserName = "张三" };
+            UserInfo userInfo = new UserInfo { UserName = "张三" };
             SqlObjectData sqlObjectData = MysqlSqlBuilder<UserInfo>.Build().BuildInsert(userInfo);
             UserInfoDal userInfoDal = new UserInfoDal();
             long userId = userInfoDal.Insert(userInfo);

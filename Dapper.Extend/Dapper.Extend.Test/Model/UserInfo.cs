@@ -12,6 +12,7 @@ namespace Dapper.Extend.Test.Model
     public class UserInfo
     {
         [PrimaryKey]
+        [Identity]
         [ColumnName("user_id")]
         public long UserId { get; set; }
 

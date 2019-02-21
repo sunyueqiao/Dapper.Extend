@@ -4,7 +4,7 @@ using System.Text;
 using System.Data;
 using Dapper;
 
-namespace Dapper.Extend
+namespace Dapper.Extend.Extension
 {
     public class DapperExtension
     {
