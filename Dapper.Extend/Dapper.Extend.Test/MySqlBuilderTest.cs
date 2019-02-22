@@ -34,5 +34,13 @@ namespace Dapper.Extend.Test
             int result = this.userInfoDal.Delete(userInfo);
             Assert.IsFalse(result < 1);
         }
+
+        [TestMethod]
+        public void TestSelectSql()
+        {
+            UserInfo userInfo = new UserInfo { UserId = 2 };
+            UserInfo result = this.userInfoDal.SelectEntity(userInfo);
+            Assert.IsFalse(result.UserId > 0);
+        }
     }
 }

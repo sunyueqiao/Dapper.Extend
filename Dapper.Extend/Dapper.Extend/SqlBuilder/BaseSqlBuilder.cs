@@ -62,10 +62,15 @@ namespace Dapper.Extend.SqlBuilder
             EntityMapper<T> entityMapper = SqlMapperContext<T>.Build().GetEntityMapper(t);
             string condition = BuildSqlCondition(entityMapper);
             StringBuilder sql = new StringBuilder();
-            sql.Append($"select {string.Join(",", entityMapper.ColumnNames)} from {entityMapper.TableName}");
+            List<string> columns = new List<string>();
+            entityMapper.RelationColumns.ForEach(column =>
+            {
+                columns.Add($"{column.ColumnName} as {column.PropertyName} ");
+            });
+            sql.Append($"select {string.Join(",", columns)} from {entityMapper.TableName}");
             if (!string.IsNullOrEmpty(condition))
             {
-                sql.Append(condition);
+                sql.Append(" where ").Append(condition);
             }
 
             DynamicParameters parameters = this.PrepareParameters(entityMapper);

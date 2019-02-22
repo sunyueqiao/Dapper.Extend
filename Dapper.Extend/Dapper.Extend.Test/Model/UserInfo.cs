@@ -14,7 +14,7 @@ namespace Dapper.Extend.Test.Model
         [PrimaryKey]
         [Identity]
         [ColumnName("user_id")]
-        public long UserId { get; set; }
+        public long? UserId { get; set; }
 
         [ColumnName("user_name")]
         public string UserName { get; set; }
