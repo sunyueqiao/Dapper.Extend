@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using Dapper.Extend.Mapper;
 using Dapper.Extend.SqlBuilder;
 using Dapper.Extend.Test.Dal;
@@ -14,9 +15,17 @@ namespace Dapper.Extend.Test
         [TestMethod]
         public void TestInsertSql()
         {
-            UserInfo userInfo = new UserInfo { UserName = "张三" };
-            long userId = this.userInfoDal.Insert(userInfo);
-            Assert.IsFalse(userId < 1);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            for (var i = 0; i < 10000; i++)
+            {
+                UserInfo userInfo = new UserInfo { UserName = "张三" };
+                long userId = this.userInfoDal.Insert(userInfo);
+            }
+            stopwatch.Stop();
+            TimeSpan timeSpan = stopwatch.Elapsed;
+            double seconds = timeSpan.TotalSeconds;
+            Console.WriteLine(seconds);
         }
 
         [TestMethod]
