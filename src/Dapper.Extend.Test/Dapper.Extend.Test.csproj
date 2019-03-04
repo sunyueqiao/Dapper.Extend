@@ -76,6 +76,7 @@
     <Compile Include="Dal\MySqlDal.cs" />
     <Compile Include="Dal\SqlServerDal.cs" />
     <Compile Include="Dal\UserInfoDal.cs" />
+    <Compile Include="Model\UserContact.cs" />
     <Compile Include="Model\UserInfo.cs" />
     <Compile Include="MySqlBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -18,5 +18,7 @@ namespace Dapper.Extend.Test.Model
 
         [ColumnName("user_name")]
         public string UserName { get; set; }
+
+        public List<UserContact> UserContact { get; set; }
     }
 }

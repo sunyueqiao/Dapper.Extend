@@ -41,6 +41,11 @@ namespace Dapper.Extend.Data.Sql.Core
             };
             foreach (PropertyInfo property in t.GetType().GetProperties())
             {
+                //如果是引用类型忽略(枚举类型、string、decimal需要特殊处理)
+                if (!this.IsSimpleType(property.PropertyType))
+                {
+                    continue;
+                }
                 string columnName = this.GetColumnName(property);
                 string propertyName = property.Name;
                 object propertyValue = property.GetValue(t);
@@ -88,6 +93,20 @@ namespace Dapper.Extend.Data.Sql.Core
         private class SqlObjectContextBuilder
         {
             public static SqlMapperContext<T> Instance { get; } = new SqlMapperContext<T>();
+        }
+
+        private bool IsSimpleType(Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                // 可空类型判断
+                return IsSimpleType(type.GetGenericArguments()[0]);
+            }
+
+            return type.IsPrimitive
+              || type.IsEnum
+              || type.Equals(typeof(string))
+              || type.Equals(typeof(decimal));
         }
     }
 }

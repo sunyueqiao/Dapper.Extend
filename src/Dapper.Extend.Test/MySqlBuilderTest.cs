@@ -49,7 +49,7 @@ namespace Dapper.Extend.Test
         {
             UserInfo userInfo = new UserInfo { UserId = 2 };
             UserInfo result = this.userInfoDal.SelectEntity(userInfo);
-            Assert.IsFalse(result.UserId > 0);
+            Assert.IsTrue(result.UserId > 0);
         }
     }
 }
