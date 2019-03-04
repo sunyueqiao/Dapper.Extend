@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Extend", "Dapper.Ext
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.Extend.Test", "Dapper.Extend.Test\Dapper.Extend.Test.csproj", "{5CC63804-2F91-42D9-9C7A-676503061AC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNet.Interceptor", "DotNet.Interceptor\DotNet.Interceptor.csproj", "{DA854276-6BE2-409A-A6B7-EF36BEC89069}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNet.Interceptor", "DotNet.Interceptor\DotNet.Interceptor.csproj", "{DA854276-6BE2-409A-A6B7-EF36BEC89069}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
