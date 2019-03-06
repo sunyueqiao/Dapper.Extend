@@ -17,14 +17,16 @@ namespace Dapper.Extend.Extension
         public static DapperExtension UseMySql(string connectionString)
         {
             DapperExtension dapperHelper = DapperHelperBuilder.build();
-            dapperHelper.DbConnection = DbConnectionFactory.GetMySqlConnection(connectionString);
+            DbConnectionContext dbConnectionContext = new DbConnectionContext(new MySqlConnectionStrategy());
+            dapperHelper.DbConnection = dbConnectionContext.ExecuteStragegy(connectionString);
             return dapperHelper;
         }
 
         public static DapperExtension UseSqlServer(string connectionString)
         {
             DapperExtension dapperHelper = DapperHelperBuilder.build();
-            dapperHelper.DbConnection = DbConnectionFactory.GetSqlConnection(connectionString);
+            DbConnectionContext dbConnectionContext = new DbConnectionContext(new SqlServerConnectionStrategy());
+            dapperHelper.DbConnection = dbConnectionContext.ExecuteStragegy(connectionString);
             return dapperHelper;
         }
 

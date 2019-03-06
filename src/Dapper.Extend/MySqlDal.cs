@@ -1,5 +1,4 @@
-﻿using Dapper.Extend;
-using Dapper.Extend.Extension;
+﻿using Dapper.Extend.Extension;
 using Dapper.Extend.Mapper;
 using Dapper.Extend.SqlBuilder;
 using System;
@@ -8,28 +7,16 @@ using System.Text;
 
 namespace Dapper.Extend
 {
-    public abstract class BaseDal<TPrimary, TEntity>
+    public abstract class MySqlDal<TPrimary, TEntity>
         where TPrimary : struct
         where TEntity : class
     {
         private readonly DapperExtension _dapperExtension;
         private readonly BaseSqlBuilder<TEntity> _baseSqlBuilder;
-        protected BaseDal(DbEnum dbEnum, string connectionString)
+        protected MySqlDal(string connectionString)
         {
-            if (dbEnum == DbEnum.MySql)
-            {
-                this._dapperExtension = DapperExtension.UseMySql(connectionString);
-                this._baseSqlBuilder = MysqlSqlBuilder<TEntity>.Build();
-            }
-            else if (dbEnum == DbEnum.SqlServer)
-            {
-                this._dapperExtension = DapperExtension.UseSqlServer(connectionString);
-                this._baseSqlBuilder = SqlServerSqlBuilder<TEntity>.Build();
-            }
-            else
-            {
-                throw new Exception("未知的数据库类型");
-            }
+            this._dapperExtension = DapperExtension.UseMySql(connectionString);
+            this._baseSqlBuilder = SqlServerSqlBuilder<TEntity>.Build();
         }
 
         public TPrimary Insert(TEntity entity)
@@ -66,6 +53,5 @@ namespace Dapper.Extend
         {
             return this._dapperExtension.Select<TEntity>(sql, parameters);
         }
-
     }
 }

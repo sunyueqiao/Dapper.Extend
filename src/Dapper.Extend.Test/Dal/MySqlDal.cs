@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Dapper.Extend.Test.Dal
 {
-    public class MySqlDal<TPrimary, TEntity> : BaseDal<TPrimary, TEntity> where TPrimary : struct where TEntity : class
+    public class MySqlDal<TPrimary, TEntity> : Extend.MySqlDal<TPrimary, TEntity> where TPrimary : struct where TEntity : class
     {
         protected static string ConnectionString
         {
@@ -16,7 +16,7 @@ namespace Dapper.Extend.Test.Dal
             }
         }
 
-        public MySqlDal() : base(DbEnum.MySql, ConnectionString)
+        public MySqlDal() : base(ConnectionString)
         {
 
         }
