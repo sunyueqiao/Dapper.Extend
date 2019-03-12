@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.OracleClient;
 using System.Data.SqlClient;
 using System.Text;
 
@@ -20,6 +21,14 @@ namespace Dapper.Extend.Extension
         public IDbConnection InitializeConnection(string connectionString)
         {
             return new SqlConnection(connectionString);
+        }
+    }
+
+    class OracleConnectionStrategy : IDbConnectionStrategy
+    {
+        public IDbConnection InitializeConnection(string connectionString)
+        {
+            return new OracleConnection(connectionString);
         }
     }
 }

@@ -7,51 +7,13 @@ using System.Text;
 
 namespace Dapper.Extend
 {
-    public class SqlServerDal<TPrimary, TEntity> 
-        where TPrimary : struct 
+    public abstract class SqlServerDal<TPrimary, TEntity> : SqlDal<TPrimary, TEntity>
+        where TPrimary : struct
         where TEntity : class
     {
         private readonly DapperExtension _dapperExtension;
-        private readonly BaseSqlBuilder<TEntity> _baseSqlBuilder;
-        protected SqlServerDal(string connectionString)
+        protected SqlServerDal(string connectionString) : base(connectionString, SqlServerSqlBuilder<TEntity>.Build(), DapperExtension.UseSqlServer(connectionString))
         {
-            this._dapperExtension = DapperExtension.UseSqlServer(connectionString);
-            this._baseSqlBuilder = SqlServerSqlBuilder<TEntity>.Build();
-        }
-
-        public virtual TPrimary Insert(TEntity entity)
-        {
-            SqlObjectData sqlObject = this._baseSqlBuilder.BuildInsert(entity);
-            return this._dapperExtension.Insert<TPrimary>(sqlObject.Sql, sqlObject.Parameters);
-        }
-
-        public virtual int Update(TEntity entity)
-        {
-            SqlObjectData sqlObject = this._baseSqlBuilder.BuildUpdate(entity);
-            return this._dapperExtension.Update(sqlObject.Sql, sqlObject.Parameters);
-        }
-
-        public virtual int Delete(TEntity entity)
-        {
-            SqlObjectData sqlObject = this._baseSqlBuilder.BuildDelete(entity);
-            return this._dapperExtension.Delete(sqlObject.Sql, sqlObject.Parameters);
-        }
-
-        public virtual IEnumerable<TEntity> Select(TEntity entity)
-        {
-            SqlObjectData sqlObjectData = this._baseSqlBuilder.BuildSelect(entity);
-            return this._dapperExtension.Select<TEntity>(string.Empty, null);
-        }
-
-        public virtual TEntity SelectEntity(TEntity entity)
-        {
-            SqlObjectData sqlObjectData = this._baseSqlBuilder.BuildSelect(entity);
-            return this._dapperExtension.SelectOne<TEntity>(sqlObjectData.Sql, sqlObjectData.Parameters);
-        }
-
-        public virtual IEnumerable<TEntity> Select(string sql, DynamicParameters parameters)
-        {
-            return this._dapperExtension.Select<TEntity>(sql, parameters);
         }
     }
 }
